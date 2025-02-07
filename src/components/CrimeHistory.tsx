@@ -42,6 +42,64 @@ const crimeData = {
       investigatingOfficer: "Officer David Wilson",
       resolution: "Suspect arrested and property recovered"
     },
+    { 
+      date: "2024-01-15", 
+      location: "Mumbai, India", 
+      status: "Solved",
+      caseNumber: "IN-TH-2024-001",
+      description: "Jewelry store robbery in commercial district",
+      suspect: "Gang of three identified",
+      evidence: "CCTV footage, fingerprints",
+      investigatingOfficer: "Inspector Raj Kumar",
+      resolution: "Suspects arrested, jewelry recovered",
+      references: [
+        { name: "Mumbai Police", url: "https://mumbaipolice.gov.in/" },
+        { name: "Indian Crime Statistics", url: "https://ncrb.gov.in/" }
+      ]
+    },
+    { 
+      date: "2024-01-12", 
+      location: "Shanghai, China", 
+      status: "Under Investigation",
+      caseNumber: "CN-TH-2024-001",
+      description: "High-tech equipment theft from research facility",
+      suspect: "Unknown",
+      evidence: "Security logs, surveillance footage",
+      investigatingOfficer: "Detective Li Wei",
+      resolution: "Investigation ongoing",
+      references: [
+        { name: "Shanghai Police", url: "http://police.sh.gov.cn/" }
+      ]
+    },
+    { 
+      date: "2024-01-10", 
+      location: "Dhaka, Bangladesh", 
+      status: "Solved",
+      caseNumber: "BD-TH-2024-001",
+      description: "Market theft incident",
+      suspect: "Local gang members",
+      evidence: "Witness statements, recovered goods",
+      investigatingOfficer: "Officer Rahman",
+      resolution: "Suspects apprehended",
+      references: [
+        { name: "Bangladesh Police", url: "https://www.police.gov.bd/" }
+      ]
+    },
+    { 
+      date: "2024-01-08", 
+      location: "London, UK", 
+      status: "Under Investigation",
+      caseNumber: "UK-TH-2024-001",
+      description: "Art gallery theft",
+      suspect: "Professional art thieves",
+      evidence: "Security footage, forensic evidence",
+      investigatingOfficer: "Detective Inspector Smith",
+      resolution: "Active investigation",
+      references: [
+        { name: "Metropolitan Police", url: "https://www.met.police.uk/" },
+        { name: "UK Crime Statistics", url: "https://www.gov.uk/government/statistics/crime-in-england-and-wales" }
+      ]
+    }
   ],
   "Assault": [
     { 
@@ -106,6 +164,35 @@ const crimeData = {
         { name: "FBI Cyber Crime", url: "https://www.fbi.gov/investigate/cyber" },
         { name: "Internet Crime Complaint Center", url: "https://www.ic3.gov/" }
       ]
+    },
+    {
+      date: "2024-01-20",
+      location: "Bangalore, India",
+      status: "Under Investigation",
+      caseNumber: "IN-CB-2024-001",
+      description: "Major tech company data breach",
+      suspect: "International hacker group",
+      evidence: "Digital footprints, server logs",
+      investigatingOfficer: "Cyber Cell Inspector Sharma",
+      resolution: "Investigation ongoing",
+      references: [
+        { name: "Indian Cybercrime Portal", url: "https://cybercrime.gov.in/" },
+        { name: "CERT-In", url: "https://www.cert-in.org.in/" }
+      ]
+    },
+    {
+      date: "2024-01-18",
+      location: "Beijing, China",
+      status: "Solved",
+      caseNumber: "CN-CB-2024-001",
+      description: "Financial institution cyber attack",
+      suspect: "Identified hacker group",
+      evidence: "Digital evidence, network logs",
+      investigatingOfficer: "Cyber Unit Chief Zhang",
+      resolution: "Perpetrators identified and arrested",
+      references: [
+        { name: "China Cybersecurity", url: "http://www.cac.gov.cn/" }
+      ]
     }
   ],
   "Drug Trafficking": [
@@ -122,6 +209,35 @@ const crimeData = {
       references: [
         { name: "DEA Drug Information", url: "https://www.dea.gov/drug-information" },
         { name: "National Drug Intelligence Center", url: "https://www.justice.gov/archive/ndic/" }
+      ]
+    },
+    {
+      date: "2024-01-15",
+      location: "Manchester, UK",
+      status: "Solved",
+      caseNumber: "UK-DT-2024-001",
+      description: "International drug trafficking ring",
+      suspect: "Multiple suspects arrested",
+      evidence: "Surveillance, controlled deliveries",
+      investigatingOfficer: "DCI Johnson",
+      resolution: "Network dismantled, key members arrested",
+      references: [
+        { name: "National Crime Agency", url: "https://www.nationalcrimeagency.gov.uk/" },
+        { name: "UK Drug Crime", url: "https://www.gov.uk/government/collections/drug-strategy-2017" }
+      ]
+    },
+    {
+      date: "2024-01-12",
+      location: "Chittagong, Bangladesh",
+      status: "Under Investigation",
+      caseNumber: "BD-DT-2024-001",
+      description: "Port drug smuggling operation",
+      suspect: "International smuggling syndicate",
+      evidence: "Seized contraband, informant testimony",
+      investigatingOfficer: "Superintendent Khan",
+      resolution: "Ongoing investigation",
+      references: [
+        { name: "Bangladesh Narcotics Control", url: "http://www.dnc.gov.bd/" }
       ]
     }
   ],
