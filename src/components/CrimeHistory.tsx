@@ -173,7 +173,7 @@ export function CrimeHistory() {
     evidence: string;
     investigatingOfficer: string;
     resolution: string;
-    references: Array<{ name: string; url: string; }>;
+    references?: Array<{ name: string; url: string; }>;  // Made optional with ?
   }>>([]);
 
   const handleSearch = (value: string) => {
@@ -185,7 +185,12 @@ export function CrimeHistory() {
     );
 
     if (matchedCrimes) {
-      setResults(matchedCrimes[1]);
+      // Ensure each crime record has a references array, even if empty
+      const crimesWithReferences = matchedCrimes[1].map(crime => ({
+        ...crime,
+        references: crime.references || []
+      }));
+      setResults(crimesWithReferences);
     } else {
       setResults([]);
     }
@@ -254,23 +259,25 @@ export function CrimeHistory() {
                       <p className="font-medium">Resolution:</p>
                       <p>{crime.resolution}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4">
-                      <p className="font-medium">Reference Links:</p>
-                      <div className="space-y-1">
-                        {crime.references.map((ref, idx) => (
-                          <a
-                            key={idx}
-                            href={ref.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center text-blue-500 hover:text-blue-600"
-                          >
-                            {ref.name}
-                            <ExternalLink className="ml-1 h-3 w-3" />
-                          </a>
-                        ))}
+                    {crime.references && crime.references.length > 0 && (
+                      <div className="grid grid-cols-2 gap-x-4">
+                        <p className="font-medium">Reference Links:</p>
+                        <div className="space-y-1">
+                          {crime.references.map((ref, idx) => (
+                            <a
+                              key={idx}
+                              href={ref.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center text-blue-500 hover:text-blue-600"
+                            >
+                              {ref.name}
+                              <ExternalLink className="ml-1 h-3 w-3" />
+                            </a>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               ))
