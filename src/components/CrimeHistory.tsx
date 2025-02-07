@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 const crimeData = {
@@ -13,7 +14,11 @@ const crimeData = {
       suspect: "John Doe",
       evidence: "CCTV footage, witness statements",
       investigatingOfficer: "Officer Sarah Johnson",
-      resolution: "Suspect apprehended and charged"
+      resolution: "Suspect apprehended and charged",
+      references: [
+        { name: "FBI Theft Statistics", url: "https://www.fbi.gov/investigate/violent-crime/theft" },
+        { name: "National Crime Prevention Council", url: "https://www.ncpc.org/resources/theft-prevention/" }
+      ]
     },
     { 
       date: "2024-01-10", 
@@ -86,6 +91,74 @@ const crimeData = {
       resolution: "Investigation in progress"
     },
   ],
+  "Cybercrime": [
+    {
+      date: "2024-01-25",
+      location: "Online",
+      status: "Under Investigation",
+      caseNumber: "CB-2024-001",
+      description: "Ransomware attack on local business network",
+      suspect: "Unknown",
+      evidence: "Digital footprints, malware signatures",
+      investigatingOfficer: "Detective Alex Chen",
+      resolution: "Investigation ongoing",
+      references: [
+        { name: "FBI Cyber Crime", url: "https://www.fbi.gov/investigate/cyber" },
+        { name: "Internet Crime Complaint Center", url: "https://www.ic3.gov/" }
+      ]
+    }
+  ],
+  "Drug Trafficking": [
+    {
+      date: "2024-01-22",
+      location: "Harbor District",
+      status: "Solved",
+      caseNumber: "DT-2024-001",
+      description: "Large-scale narcotics distribution operation",
+      suspect: "Multiple suspects identified",
+      evidence: "Surveillance footage, controlled purchases, financial records",
+      investigatingOfficer: "Detective Maria Rodriguez",
+      resolution: "Multiple arrests made, operation dismantled",
+      references: [
+        { name: "DEA Drug Information", url: "https://www.dea.gov/drug-information" },
+        { name: "National Drug Intelligence Center", url: "https://www.justice.gov/archive/ndic/" }
+      ]
+    }
+  ],
+  "Fraud": [
+    {
+      date: "2024-01-20",
+      location: "Financial District",
+      status: "Under Investigation",
+      caseNumber: "FR-2024-001",
+      description: "Investment fraud scheme targeting elderly residents",
+      suspect: "Under Investigation",
+      evidence: "Financial documents, victim statements, phone records",
+      investigatingOfficer: "Detective James Wilson",
+      resolution: "Active investigation",
+      references: [
+        { name: "FBI Fraud Information", url: "https://www.fbi.gov/investigate/white-collar-crime" },
+        { name: "FTC Scam Alerts", url: "https://consumer.ftc.gov/scam-alerts" }
+      ]
+    }
+  ],
+  "Homicide": [
+    {
+      date: "2024-01-18",
+      location: "Residential Area",
+      status: "Under Investigation",
+      caseNumber: "HM-2024-001",
+      description: "Suspicious death under investigation",
+      suspect: "Under Investigation",
+      evidence: "Physical evidence, forensic analysis, witness statements",
+      investigatingOfficer: "Detective Sarah Martinez",
+      resolution: "Active investigation",
+      references: [
+        { name: "FBI Violent Crime Statistics", url: "https://www.fbi.gov/investigate/violent-crime" },
+        { name: "National Center for Homicide Research", url: "https://www.hominicide.org/" }
+      ]
+    }
+  ]
 };
 
 export function CrimeHistory() {
@@ -100,6 +173,7 @@ export function CrimeHistory() {
     evidence: string;
     investigatingOfficer: string;
     resolution: string;
+    references: Array<{ name: string; url: string; }>;
   }>>([]);
 
   const handleSearch = (value: string) => {
@@ -128,7 +202,7 @@ export function CrimeHistory() {
         <div className="space-y-4">
           <Input
             type="text"
-            placeholder="Enter type of crime (e.g., Theft, Assault)"
+            placeholder="Enter type of crime (e.g., Theft, Assault, Cybercrime, Drug Trafficking, Fraud, Homicide)"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             className="w-full"
@@ -179,6 +253,23 @@ export function CrimeHistory() {
                     <div className="grid grid-cols-2 gap-x-4">
                       <p className="font-medium">Resolution:</p>
                       <p>{crime.resolution}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4">
+                      <p className="font-medium">Reference Links:</p>
+                      <div className="space-y-1">
+                        {crime.references.map((ref, idx) => (
+                          <a
+                            key={idx}
+                            href={ref.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center text-blue-500 hover:text-blue-600"
+                          >
+                            {ref.name}
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
