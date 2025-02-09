@@ -1,88 +1,140 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import OSM from 'ol/source/OSM';
+import { fromLonLat } from 'ol/proj';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
+import Overlay from 'ol/Overlay';
+import 'ol/ol.css';
 import { crimeData } from "@/data/crimeData";
 
 export function CrimeMap() {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState("");
+  const mapElement = useRef<HTMLDivElement>(null);
+  const map = useRef<Map | null>(null);
+  const popup = useRef<HTMLDivElement>(null);
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+  useEffect(() => {
+    if (!mapElement.current) return;
 
-    // Initialize map
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [78.9629, 20.5937], // Center on India
-      zoom: 4
+    // Create popup overlay
+    const popupOverlay = new Overlay({
+      element: popup.current!,
+      positioning: 'bottom-center',
+      stopEvent: false,
+      offset: [0, -10],
     });
 
-    // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl(),
-      'top-right'
-    );
+    // Initialize map
+    map.current = new Map({
+      target: mapElement.current,
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+      ],
+      view: new View({
+        center: fromLonLat([78.9629, 20.5937]), // Center on India
+        zoom: 4,
+      }),
+    });
 
-    // Add crime markers when map loads
-    map.current.on('load', addCrimeMarkers);
-  };
+    map.current.addOverlay(popupOverlay);
 
-  const addCrimeMarkers = () => {
-    if (!map.current) return;
-
-    // Process crime data
+    // Create markers for each crime location
+    const features: Feature[] = [];
+    
     Object.entries(crimeData).forEach(([crimeType, records]) => {
       records.forEach((crime) => {
-        // Only process records with Indian locations
         if (crime.location.includes('India')) {
           const coordinates = getCoordinatesForCity(crime.location);
-          
-          // Create a popup
-          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <strong>${crimeType}</strong>
-            <p>${crime.description}</p>
-            <p><small>${crime.date}</small></p>
-          `);
+          const feature = new Feature({
+            geometry: new Point(fromLonLat(coordinates)),
+            properties: {
+              crimeType,
+              description: crime.description,
+              date: crime.date,
+            },
+          });
 
-          // Create marker element
-          const el = document.createElement('div');
-          el.className = 'marker';
-          el.style.width = '20px';
-          el.style.height = '20px';
-          el.style.borderRadius = '50%';
-          el.style.cursor = 'pointer';
-          
-          // Color code by crime type
+          // Style based on crime type
+          let color: string;
           switch(crimeType) {
             case 'Theft':
-              el.style.backgroundColor = '#ef4444';
+              color = '#ef4444';
               break;
             case 'Cybercrime':
-              el.style.backgroundColor = '#3b82f6';
+              color = '#3b82f6';
               break;
             case 'Drug Trafficking':
-              el.style.backgroundColor = '#8b5cf6';
+              color = '#8b5cf6';
               break;
             default:
-              el.style.backgroundColor = '#71717a';
+              color = '#71717a';
           }
 
-          // Add marker to map
-          new mapboxgl.Marker(el)
-            .setLngLat(coordinates)
-            .setPopup(popup)
-            .addTo(map.current);
+          feature.setStyle(new Style({
+            image: new CircleStyle({
+              radius: 6,
+              fill: new Fill({ color }),
+              stroke: new Stroke({
+                color: '#fff',
+                width: 2,
+              }),
+            }),
+          }));
+
+          features.push(feature);
         }
       });
     });
-  };
+
+    // Add vector layer with markers
+    const vectorSource = new VectorSource({
+      features,
+    });
+
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+    });
+
+    map.current.addLayer(vectorLayer);
+
+    // Add click handler for popups
+    map.current.on('click', (evt) => {
+      const feature = map.current!.forEachFeatureAtPixel(evt.pixel, (feature) => feature);
+      
+      if (feature) {
+        const props = feature.get('properties');
+        const coordinates = (feature.getGeometry() as Point).getCoordinates();
+        
+        const content = `
+          <div class="bg-card text-card-foreground p-2 rounded-lg shadow-lg">
+            <strong class="text-primary">${props.crimeType}</strong>
+            <p class="text-sm">${props.description}</p>
+            <p class="text-xs text-muted-foreground">${props.date}</p>
+          </div>
+        `;
+        
+        popup.current!.innerHTML = content;
+        popupOverlay.setPosition(coordinates);
+      } else {
+        popupOverlay.setPosition(undefined);
+      }
+    });
+
+    return () => {
+      if (map.current) {
+        map.current.setTarget(undefined);
+      }
+    };
+  }, []);
 
   // Helper function to get coordinates for Indian cities
   const getCoordinatesForCity = (location: string): [number, number] => {
@@ -101,22 +153,9 @@ export function CrimeMap() {
       'Gujarat, India': [71.1924, 22.2587],
     };
 
-    // Extract city name from location string
     const city = Object.keys(cityCoordinates).find(key => location.includes(key));
     return city ? cityCoordinates[city] : [78.9629, 20.5937]; // Default to India center
   };
-
-  useEffect(() => {
-    if (mapboxToken) {
-      initializeMap();
-    }
-    
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-    };
-  }, [mapboxToken]);
 
   return (
     <Card className="bg-card">
@@ -126,32 +165,10 @@ export function CrimeMap() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!mapboxToken ? (
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Please enter your Mapbox public token to view the crime map. You can get one at{" "}
-              <a 
-                href="https://www.mapbox.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-            <Input
-              type="text"
-              placeholder="Enter Mapbox token"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              className="w-full"
-            />
-          </div>
-        ) : (
-          <div className="h-[500px] rounded-lg overflow-hidden">
-            <div ref={mapContainer} className="w-full h-full" />
-          </div>
-        )}
+        <div className="h-[500px] rounded-lg overflow-hidden relative">
+          <div ref={mapElement} className="w-full h-full" />
+          <div ref={popup} className="absolute" />
+        </div>
       </CardContent>
     </Card>
   );
