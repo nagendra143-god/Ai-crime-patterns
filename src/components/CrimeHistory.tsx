@@ -6,98 +6,60 @@ import { useState } from "react";
 const crimeData = {
   "Theft": [
     { 
-      date: "2024-01-15", 
-      location: "Downtown", 
+      date: "2023-12-10", 
+      location: "Delhi, India", 
       status: "Solved",
-      caseNumber: "TH-2024-001",
-      description: "Shoplifting incident at local convenience store",
-      suspect: "John Doe",
-      evidence: "CCTV footage, witness statements",
-      investigatingOfficer: "Officer Sarah Johnson",
-      resolution: "Suspect apprehended and charged",
+      caseNumber: "IN-TH-2023-045",
+      description: "High-value electronics theft from warehouse",
+      suspect: "Organized criminal group",
+      evidence: "CCTV footage, fingerprints, informant testimony",
+      investigatingOfficer: "Inspector Priya Singh",
+      resolution: "Suspects arrested, goods recovered",
       references: [
-        { name: "FBI Theft Statistics", url: "https://www.fbi.gov/investigate/violent-crime/theft" },
-        { name: "National Crime Prevention Council", url: "https://www.ncpc.org/resources/theft-prevention/" }
-      ]
-    },
-    { 
-      date: "2024-01-10", 
-      location: "West District", 
-      status: "Under Investigation",
-      caseNumber: "TH-2024-002",
-      description: "Vehicle theft from parking garage",
-      suspect: "Unknown",
-      evidence: "Security camera footage, fingerprints",
-      investigatingOfficer: "Detective Mike Brown",
-      resolution: "Pending investigation"
-    },
-    { 
-      date: "2024-01-05", 
-      location: "South Area", 
-      status: "Solved",
-      caseNumber: "TH-2024-003",
-      description: "Residential burglary",
-      suspect: "Jane Smith",
-      evidence: "DNA samples, stolen items recovered",
-      investigatingOfficer: "Officer David Wilson",
-      resolution: "Suspect arrested and property recovered"
-    },
-    { 
-      date: "2024-01-15", 
-      location: "Mumbai, India", 
-      status: "Solved",
-      caseNumber: "IN-TH-2024-001",
-      description: "Jewelry store robbery in commercial district",
-      suspect: "Gang of three identified",
-      evidence: "CCTV footage, fingerprints",
-      investigatingOfficer: "Inspector Raj Kumar",
-      resolution: "Suspects arrested, jewelry recovered",
-      references: [
-        { name: "Mumbai Police", url: "https://mumbaipolice.gov.in/" },
+        { name: "Delhi Police", url: "https://delhipolice.gov.in/" },
         { name: "Indian Crime Statistics", url: "https://ncrb.gov.in/" }
       ]
     },
     { 
-      date: "2024-01-12", 
-      location: "Shanghai, China", 
-      status: "Under Investigation",
-      caseNumber: "CN-TH-2024-001",
-      description: "High-tech equipment theft from research facility",
-      suspect: "Unknown",
-      evidence: "Security logs, surveillance footage",
-      investigatingOfficer: "Detective Li Wei",
-      resolution: "Investigation ongoing",
-      references: [
-        { name: "Shanghai Police", url: "http://police.sh.gov.cn/" }
-      ]
-    },
-    { 
-      date: "2024-01-10", 
-      location: "Dhaka, Bangladesh", 
+      date: "2023-08-15", 
+      location: "Bangalore, India", 
       status: "Solved",
-      caseNumber: "BD-TH-2024-001",
-      description: "Market theft incident",
-      suspect: "Local gang members",
-      evidence: "Witness statements, recovered goods",
-      investigatingOfficer: "Officer Rahman",
-      resolution: "Suspects apprehended",
+      caseNumber: "IN-TH-2023-032",
+      description: "Corporate office theft of computers",
+      suspect: "Internal employee",
+      evidence: "Access logs, CCTV footage",
+      investigatingOfficer: "DCP Ramesh Kumar",
+      resolution: "Suspect identified and arrested",
       references: [
-        { name: "Bangladesh Police", url: "https://www.police.gov.bd/" }
+        { name: "Bangalore Police", url: "https://bengalurupolice.karnataka.gov.in/" }
       ]
     },
     { 
-      date: "2024-01-08", 
-      location: "London, UK", 
-      status: "Under Investigation",
-      caseNumber: "UK-TH-2024-001",
-      description: "Art gallery theft",
-      suspect: "Professional art thieves",
+      date: "2022-11-20", 
+      location: "Mumbai, India", 
+      status: "Solved",
+      caseNumber: "IN-TH-2022-078",
+      description: "Bank locker room break-in",
+      suspect: "Professional thieves",
       evidence: "Security footage, forensic evidence",
-      investigatingOfficer: "Detective Inspector Smith",
-      resolution: "Active investigation",
+      investigatingOfficer: "ACP Sharma",
+      resolution: "Gang apprehended, valuables recovered",
       references: [
-        { name: "Metropolitan Police", url: "https://www.met.police.uk/" },
-        { name: "UK Crime Statistics", url: "https://www.gov.uk/government/statistics/crime-in-england-and-wales" }
+        { name: "Mumbai Police", url: "https://mumbaipolice.gov.in/" }
+      ]
+    },
+    { 
+      date: "2022-07-05", 
+      location: "Chennai, India", 
+      status: "Solved",
+      caseNumber: "IN-TH-2022-054",
+      description: "Gold theft from jewelry store",
+      suspect: "International gang",
+      evidence: "CCTV, DNA evidence",
+      investigatingOfficer: "Inspector Senthil Kumar",
+      resolution: "Criminals caught at airport",
+      references: [
+        { name: "Tamil Nadu Police", url: "https://www.tnpolice.gov.in/" }
       ]
     }
   ],
@@ -193,6 +155,63 @@ const crimeData = {
       references: [
         { name: "China Cybersecurity", url: "http://www.cac.gov.cn/" }
       ]
+    },
+    {
+      date: "2023-11-15",
+      location: "Hyderabad, India",
+      status: "Solved",
+      caseNumber: "IN-CB-2023-089",
+      description: "Cryptocurrency exchange hack attempt",
+      suspect: "Hacker group from Eastern Europe",
+      evidence: "Digital footprints, server logs, IP addresses",
+      investigatingOfficer: "Cyber Cell DCP Ravi Teja",
+      resolution: "Attack prevented, suspects identified",
+      references: [
+        { name: "Telangana Police Cybercrime", url: "https://www.telanganapolice.gov.in/" },
+        { name: "Indian Cybercrime Portal", url: "https://cybercrime.gov.in/" }
+      ]
+    },
+    {
+      date: "2023-06-28",
+      location: "Pune, India",
+      status: "Solved",
+      caseNumber: "IN-CB-2023-067",
+      description: "Banking trojan malware attack",
+      suspect: "Domestic cybercrime group",
+      evidence: "Malware samples, financial trails",
+      investigatingOfficer: "SP Cyber Cell Anand Patil",
+      resolution: "Group arrested, malware infrastructure dismantled",
+      references: [
+        { name: "Maharashtra Cyber", url: "https://www.maharashtracyber.org/" }
+      ]
+    },
+    {
+      date: "2022-12-12",
+      location: "Kolkata, India",
+      status: "Under Investigation",
+      caseNumber: "IN-CB-2022-098",
+      description: "Corporate data breach",
+      suspect: "Suspected insider threat",
+      evidence: "System logs, email records",
+      investigatingOfficer: "Joint CP Cyber Cell Roy",
+      resolution: "Investigation ongoing",
+      references: [
+        { name: "Kolkata Police", url: "http://www.kolkatapolice.gov.in/" }
+      ]
+    },
+    {
+      date: "2022-03-30",
+      location: "Gurgaon, India",
+      status: "Solved",
+      caseNumber: "IN-CB-2022-045",
+      description: "Online banking fraud scheme",
+      suspect: "Local cybercrime gang",
+      evidence: "Transaction logs, phone records",
+      investigatingOfficer: "ACP Cyber Cell Verma",
+      resolution: "Perpetrators arrested, funds recovered",
+      references: [
+        { name: "Haryana Police", url: "http://www.haryanapolice.gov.in/" }
+      ]
     }
   ],
   "Drug Trafficking": [
@@ -238,6 +257,63 @@ const crimeData = {
       resolution: "Ongoing investigation",
       references: [
         { name: "Bangladesh Narcotics Control", url: "http://www.dnc.gov.bd/" }
+      ]
+    },
+    {
+      date: "2023-10-08",
+      location: "Amritsar, India",
+      status: "Solved",
+      caseNumber: "IN-DT-2023-056",
+      description: "Cross-border drug smuggling operation",
+      suspect: "International drug cartel",
+      evidence: "Surveillance data, informant information, seized contraband",
+      investigatingOfficer: "DIG Narcotics Singh",
+      resolution: "Major seizure, key suspects arrested",
+      references: [
+        { name: "Punjab Police", url: "https://www.punjabpolice.gov.in/" },
+        { name: "Narcotics Control Bureau", url: "https://narcoticsindia.nic.in/" }
+      ]
+    },
+    {
+      date: "2023-04-15",
+      location: "Goa, India",
+      status: "Solved",
+      caseNumber: "IN-DT-2023-034",
+      description: "Coastal drug trafficking network",
+      suspect: "Multiple local gangs",
+      evidence: "Undercover operations, seized substances",
+      investigatingOfficer: "SP Narcotics Division Naik",
+      resolution: "Network dismantled, multiple arrests",
+      references: [
+        { name: "Goa Police", url: "https://www.goapolice.gov.in/" }
+      ]
+    },
+    {
+      date: "2022-09-22",
+      location: "Manipur, India",
+      status: "Under Investigation",
+      caseNumber: "IN-DT-2022-078",
+      description: "Golden Triangle drug route operation",
+      suspect: "International smuggling syndicate",
+      evidence: "Border surveillance, informant reports",
+      investigatingOfficer: "Joint Director NCB Kumar",
+      resolution: "Ongoing investigation",
+      references: [
+        { name: "Manipur Police", url: "https://manipurpolice.gov.in/" }
+      ]
+    },
+    {
+      date: "2022-02-18",
+      location: "Gujarat, India",
+      status: "Solved",
+      caseNumber: "IN-DT-2022-023",
+      description: "Maritime drug trafficking operation",
+      suspect: "International drug syndicate",
+      evidence: "Coast guard intelligence, seized shipments",
+      investigatingOfficer: "DIG Coast Guard Patel",
+      resolution: "Major drug haul seized, arrests made",
+      references: [
+        { name: "Gujarat Police", url: "https://police.gujarat.gov.in/" }
       ]
     }
   ],
