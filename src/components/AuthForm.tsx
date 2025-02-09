@@ -40,7 +40,21 @@ export const AuthForm = () => {
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          // Handle the email not confirmed error specifically
+          if (error.message === "Email not confirmed") {
+            toast({
+              title: "Email Not Verified",
+              description: "Please check your email and click the verification link before logging in.",
+              variant: "destructive",
+            });
+          } else {
+            throw error;
+          }
+          return;
+        }
+
         toast({
           title: "Welcome back!",
           description: "You have successfully logged in.",
