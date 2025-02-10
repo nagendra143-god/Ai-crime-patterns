@@ -15,10 +15,12 @@ import { Loader2, Shield, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
+type Role = "admin" | "moderator" | "user";
+
 type UserWithRoles = {
   id: string;
   email: string;
-  roles: string[];
+  roles: Role[];
 };
 
 export function UserManagement() {
@@ -32,7 +34,7 @@ export function UserManagement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-      return data?.map(r => r.role) || [];
+      return (data?.map(r => r.role) || []) as Role[];
     }
   });
 
@@ -53,7 +55,7 @@ export function UserManagement() {
             return {
               id: user.id,
               email: user.email || "",
-              roles: roles?.map((r) => r.role) || [],
+              roles: (roles?.map((r) => r.role) || []) as Role[],
             };
           })
         );
@@ -74,19 +76,19 @@ export function UserManagement() {
     }
   }, [isAdmin, toast]);
 
-  const handleRoleChange = async (userId: string, role: string) => {
+  const handleRoleChange = async (userId: string, newRole: Role) => {
     setLoading(true);
     try {
       const { error } = await supabase
         .from("user_roles")
-        .insert({ user_id: userId, role });
+        .insert({ user_id: userId, role: newRole });
 
       if (error) throw error;
 
       setUsers((prev) =>
         prev.map((user) =>
           user.id === userId
-            ? { ...user, roles: [...user.roles, role] }
+            ? { ...user, roles: [...user.roles, newRole] }
             : user
         )
       );
@@ -107,7 +109,7 @@ export function UserManagement() {
     }
   };
 
-  const handleRemoveRole = async (userId: string, roleToRemove: string) => {
+  const handleRemoveRole = async (userId: string, roleToRemove: Role) => {
     setLoading(true);
     try {
       const { error } = await supabase
@@ -195,7 +197,7 @@ export function UserManagement() {
               <div className="flex items-center gap-2">
                 <Select
                   disabled={loading}
-                  onValueChange={(value) => handleRoleChange(user.id, value)}
+                  onValueChange={(value: Role) => handleRoleChange(user.id, value)}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Add role" />
