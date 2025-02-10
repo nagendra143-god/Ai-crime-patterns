@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      crimes: {
+        Row: {
+          case_number: string
+          created_at: string
+          crime_type: string
+          date: string
+          description: string
+          evidence: string
+          id: string
+          investigating_officer: string
+          location: string
+          resolution: string
+          status: string
+          suspect: string
+          updated_at: string
+        }
+        Insert: {
+          case_number: string
+          created_at?: string
+          crime_type: string
+          date: string
+          description: string
+          evidence: string
+          id?: string
+          investigating_officer: string
+          location: string
+          resolution: string
+          status: string
+          suspect: string
+          updated_at?: string
+        }
+        Update: {
+          case_number?: string
+          created_at?: string
+          crime_type?: string
+          date?: string
+          description?: string
+          evidence?: string
+          id?: string
+          investigating_officer?: string
+          location?: string
+          resolution?: string
+          status?: string
+          suspect?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
