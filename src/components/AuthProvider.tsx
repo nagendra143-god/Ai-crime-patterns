@@ -24,15 +24,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      navigate("/auth");
-    } catch (error) {
-      console.error("Error signing out:", error);
-      // Force navigation to auth page even if sign out fails
-      navigate("/auth");
-    }
+    await supabase.auth.signOut();
+    setUser(null);
+    navigate("/auth");
   };
 
   const handleInvalidSession = () => {
@@ -45,44 +39,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    const getUser = async () => {
+    const getSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          if (error.message?.includes('User from sub claim in JWT does not exist')) {
-            handleInvalidSession();
-            return;
-          }
-          throw error;
-        }
-        
+        if (error) throw error;
         setUser(session?.user ?? null);
-      } catch (error) {
-        console.error("Auth error:", error);
+      } catch (error: any) {
+        console.error("Session error:", error);
+        if (error.message?.includes('JWT does not exist') || 
+            error.message?.includes('User from sub claim in JWT does not exist')) {
+          handleInvalidSession();
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    getUser();
+    getSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      try {
-        if (session?.user) {
-          setUser(session.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error: any) {
-        if (error.message?.includes('User from sub claim in JWT does not exist')) {
-          handleInvalidSession();
-        } else {
-          console.error("Auth error:", error);
-        }
-      } finally {
-        setIsLoading(false);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -97,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
