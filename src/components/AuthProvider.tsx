@@ -24,28 +24,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    navigate("/auth");
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      // Force navigation to auth page even if sign out fails
+      navigate("/auth");
+    }
+  };
+
+  const handleInvalidSession = () => {
+    toast({
+      title: "Session Expired",
+      description: "Please sign in again.",
+      variant: "destructive",
+    });
+    handleSignOut();
   };
 
   useEffect(() => {
     const getUser = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-      } catch (error: any) {
-        // Check if error is due to user not found
-        if (error.message?.includes('User from sub claim in JWT does not exist')) {
-          toast({
-            title: "Session Expired",
-            description: "Please sign in again.",
-            variant: "destructive",
-          });
-          await handleSignOut();
-        } else {
-          console.error("Auth error:", error);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          if (error.message?.includes('User from sub claim in JWT does not exist')) {
+            handleInvalidSession();
+            return;
+          }
+          throw error;
         }
+        
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("Auth error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -55,15 +69,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
-        setUser(session?.user ?? null);
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+        }
       } catch (error: any) {
         if (error.message?.includes('User from sub claim in JWT does not exist')) {
-          toast({
-            title: "Session Expired",
-            description: "Please sign in again.",
-            variant: "destructive",
-          });
-          await handleSignOut();
+          handleInvalidSession();
         } else {
           console.error("Auth error:", error);
         }
