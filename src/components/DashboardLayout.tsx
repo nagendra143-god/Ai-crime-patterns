@@ -1,7 +1,10 @@
+
 import { AlertPanel } from "./AlertPanel";
 import { CrimeMap } from "./CrimeMap";
 import { DataAnalytics } from "./DataAnalytics";
 import { HistoricalData } from "./HistoricalData";
+import { UserManagement } from "./admin/UserManagement";
+import { RoleGuard } from "./RoleGuard";
 
 export function DashboardLayout() {
   return (
@@ -9,6 +12,11 @@ export function DashboardLayout() {
       <h1 className="text-2xl font-bold text-primary mb-6">
         Crime Pattern Detection System
       </h1>
+      
+      <RoleGuard allowedRoles={["admin"]}>
+        <UserManagement />
+      </RoleGuard>
+
       <DataAnalytics />
       <div className="grid gap-4 md:grid-cols-2">
         <CrimeMap />

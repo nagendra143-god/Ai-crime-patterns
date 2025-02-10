@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 type CrimeFormData = {
   crime_type: string;
@@ -27,6 +27,21 @@ export function AddCrimeDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
   const { register, handleSubmit, reset } = useForm<CrimeFormData>();
+
+  const { data: userRoles } = useQuery({
+    queryKey: ["userRoles"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      return data?.map(r => r.role) || [];
+    }
+  });
+
+  const canAddCrime = userRoles?.some(role => ["admin", "moderator"].includes(role));
 
   const onSubmit = async (data: CrimeFormData) => {
     try {
@@ -50,6 +65,10 @@ export function AddCrimeDialog() {
       });
     }
   };
+
+  if (!canAddCrime) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
