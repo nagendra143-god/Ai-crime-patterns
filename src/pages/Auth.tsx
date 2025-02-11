@@ -28,15 +28,16 @@ const Auth = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0A192F] relative overflow-hidden">
-      {/* Background overlay with gradient and image */}
+    <div className="min-h-screen flex items-center justify-center bg-[#0A192F] relative overflow-hidden auth-pattern">
+      {/* Background overlay with gradient and crime pattern */}
       <div 
         className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/95 to-secondary/90"
         style={{
-          backgroundImage: `url("/placeholder.svg")`,
+          backgroundImage: `url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1920&q=80")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: '0.15'
+          opacity: '0.15',
+          filter: 'blur(3px)'
         }}
       />
       
