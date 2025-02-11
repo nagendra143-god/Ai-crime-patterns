@@ -1,27 +1,12 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2, Shield, User } from "lucide-react";
+import { Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-
-type Role = "admin" | "moderator" | "user";
-
-type UserWithRoles = {
-  id: string;
-  email: string;
-  roles: Role[];
-};
+import { UserRolesList } from "./UserRolesList";
+import { type Role, type UserWithRoles } from "./types";
 
 export function UserManagement() {
   const { toast } = useToast();
@@ -164,55 +149,12 @@ export function UserManagement() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {users.map((user) => (
-            <div
-              key={user.id}
-              className="flex items-center justify-between p-4 border rounded-lg"
-            >
-              <div className="flex items-center gap-3">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">{user.email}</p>
-                  <div className="flex gap-2 mt-2">
-                    {user.roles.map((role) => (
-                      <Badge
-                        key={role}
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {role}
-                        <button
-                          onClick={() => handleRemoveRole(user.id, role)}
-                          className="ml-1 hover:text-destructive"
-                          disabled={loading}
-                        >
-                          ×
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  disabled={loading}
-                  onValueChange={(value: Role) => handleRoleChange(user.id, value)}
-                >
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Add role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="moderator">Moderator</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
-                  </SelectContent>
-                </Select>
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              </div>
-            </div>
-          ))}
-        </div>
+        <UserRolesList
+          users={users}
+          onRemoveRole={handleRemoveRole}
+          onAddRole={handleRoleChange}
+          loading={loading}
+        />
       </CardContent>
     </Card>
   );
