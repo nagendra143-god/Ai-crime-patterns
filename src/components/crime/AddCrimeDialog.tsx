@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -41,7 +42,7 @@ export function AddCrimeDialog() {
     }
   });
 
-  const canAddCrime = userRoles?.some(role => ["admin", "moderator"].includes(role));
+  const isAdmin = userRoles?.includes("admin");
 
   const onSubmit = async (data: CrimeFormData) => {
     try {
@@ -66,7 +67,7 @@ export function AddCrimeDialog() {
     }
   };
 
-  if (!canAddCrime) {
+  if (!isAdmin) {
     return null;
   }
 
