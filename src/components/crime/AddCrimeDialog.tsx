@@ -29,20 +29,25 @@ export function AddCrimeDialog() {
   const { toast } = useToast();
   const { register, handleSubmit, reset } = useForm<CrimeFormData>();
 
-  const { data: userRoles } = useQuery({
-    queryKey: ["userRoles"],
+  const { data: isAdmin = false } = useQuery({
+    queryKey: ["isAdmin"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      return data?.map(r => r.role) || [];
+      if (!user) return false;
+      
+      const { data, error } = await supabase.rpc('has_role', {
+        user_id: user.id,
+        role: 'admin'
+      });
+      
+      if (error) {
+        console.error('Error checking admin role:', error);
+        return false;
+      }
+      
+      return data || false;
     }
   });
-
-  const isAdmin = userRoles?.includes("admin");
 
   const onSubmit = async (data: CrimeFormData) => {
     try {
