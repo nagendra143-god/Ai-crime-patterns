@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,14 +22,13 @@ export const AuthForm = () => {
     try {
       if (isResetPassword) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/reset-password`,
+          redirectTo: window.location.origin + "/auth/reset-password",
         });
         if (error) throw error;
         toast({
           title: "Password Reset Email Sent",
-          description: "Please check your email for the password reset link.",
+          description: "Please check your email and click the reset link to set a new password.",
         });
-        setIsResetPassword(false);
       } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
@@ -39,6 +37,7 @@ export const AuthForm = () => {
             data: {
               full_name: fullName,
             },
+            emailRedirectTo: window.location.origin + "/auth",
           },
         });
         if (error) throw error;
@@ -51,7 +50,6 @@ export const AuthForm = () => {
           email,
           password,
         });
-        
         if (error) {
           if (error.message === "Email not confirmed") {
             toast({
@@ -64,7 +62,6 @@ export const AuthForm = () => {
           }
           return;
         }
-
         toast({
           title: "Welcome back!",
           description: "You have successfully logged in.",
@@ -97,12 +94,16 @@ export const AuthForm = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                placeholder="Enter your email address"
               />
             </div>
+            <p className="text-sm text-muted-foreground">
+              Enter your email address and we'll send you a link to reset your password.
+            </p>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Processing..." : "Send Reset Link"}
+              {isLoading ? "Sending..." : "Send Reset Link"}
             </Button>
             <Button
               type="button"
