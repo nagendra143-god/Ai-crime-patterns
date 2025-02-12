@@ -1,17 +1,20 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthForm } from "@/components/AuthForm";
+import { ResetPasswordForm } from "@/components/ResetPasswordForm";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, Shield } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isResetPassword = location.pathname === "/auth/reset-password";
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session && !isResetPassword) {
         navigate("/");
       }
     };
@@ -19,13 +22,13 @@ const Auth = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" && !isResetPassword) {
         navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, isResetPassword]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0A192F] relative overflow-hidden auth-pattern">
@@ -56,7 +59,7 @@ const Auth = () => {
           </p>
         </div>
         <div className="bg-card/80 backdrop-blur-sm rounded-lg border border-accent p-6 shadow-xl">
-          <AuthForm />
+          {isResetPassword ? <ResetPasswordForm /> : <AuthForm />}
         </div>
       </div>
     </div>
