@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -20,7 +21,17 @@ export const AuthForm = () => {
     setIsLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isResetPassword) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/reset-password`,
+        });
+        if (error) throw error;
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Please check your email for the password reset link.",
+        });
+        setIsResetPassword(false);
+      } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -42,7 +53,6 @@ export const AuthForm = () => {
         });
         
         if (error) {
-          // Handle the email not confirmed error specifically
           if (error.message === "Email not confirmed") {
             toast({
               title: "Email Not Verified",
@@ -70,6 +80,43 @@ export const AuthForm = () => {
       setIsLoading(false);
     }
   };
+
+  if (isResetPassword) {
+    return (
+      <Card className="w-[350px]">
+        <CardHeader className="text-2xl font-bold text-center">
+          Reset Password
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-2">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Processing..." : "Send Reset Link"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => setIsResetPassword(false)}
+            >
+              Back to Login
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-[350px]">
@@ -124,6 +171,16 @@ export const AuthForm = () => {
           >
             {isSignUp ? "Already have an account? Login" : "Need an account? Sign Up"}
           </Button>
+          {!isSignUp && (
+            <Button
+              type="button"
+              variant="link"
+              className="w-full"
+              onClick={() => setIsResetPassword(true)}
+            >
+              Forgot your password?
+            </Button>
+          )}
         </CardFooter>
       </form>
     </Card>
