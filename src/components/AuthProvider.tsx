@@ -24,32 +24,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
     setUser(null);
     navigate("/auth");
   };
 
-  const handleInvalidSession = () => {
-    toast({
-      title: "Session Expired",
-      description: "Please sign in again.",
-      variant: "destructive",
-    });
-    handleSignOut();
+  const handleSessionError = async (error: any) => {
+    console.error("Session error:", error);
+    if (
+      error.message?.includes('refresh_token_not_found') ||
+      error.message?.includes('Invalid Refresh Token') ||
+      error.message?.includes('JWT expired')
+    ) {
+      toast({
+        title: "Session Expired",
+        description: "Please sign in again.",
+        variant: "destructive",
+      });
+      await handleSignOut();
+    }
   };
 
   useEffect(() => {
     const getSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
         setUser(session?.user ?? null);
       } catch (error: any) {
-        console.error("Session error:", error);
-        if (error.message?.includes('JWT does not exist') || 
-            error.message?.includes('User from sub claim in JWT does not exist')) {
-          handleInvalidSession();
-        }
+        await handleSessionError(error);
       } finally {
         setIsLoading(false);
       }
@@ -57,12 +66,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     getSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'TOKEN_REFRESHED') {
+        setUser(session?.user ?? null);
+      } else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        setUser(null);
+        navigate("/auth");
+      } else {
+        setUser(session?.user ?? null);
+      }
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   return (
