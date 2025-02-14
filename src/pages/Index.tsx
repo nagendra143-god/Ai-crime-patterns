@@ -1,11 +1,9 @@
-import { DashboardLayout } from "@/components/DashboardLayout";
+
+import React from 'react';
+import UMLDiagrams from '@/components/UMLDiagrams';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <DashboardLayout />
-    </div>
-  );
+  return <UMLDiagrams />;
 };
 
 export default Index;
