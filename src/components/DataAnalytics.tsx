@@ -2,14 +2,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "./StatCard";
 import { CrimeHistory } from "./CrimeHistory";
-import { AddCrimeDialog } from "./crime/AddCrimeDialog";
 
 export function DataAnalytics() {
   return (
     <div className="grid gap-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Crime Analytics Dashboard</h2>
-        <AddCrimeDialog />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
