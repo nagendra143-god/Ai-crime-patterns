@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { RoleGuard } from "@/components/RoleGuard";
 
 type CrimeFormData = {
   crime_type: string;
@@ -53,125 +52,123 @@ export function AddCrimeDialog() {
   };
 
   return (
-    <RoleGuard allowedRoles={["admin"]}>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Crime
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add New Crime Record</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="crime_type">Crime Type</Label>
-                <Input
-                  id="crime_type"
-                  {...register("crime_type")}
-                  placeholder="e.g., Theft, Cybercrime"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  {...register("date")}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  {...register("location")}
-                  placeholder="City, State"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Input
-                  id="status"
-                  {...register("status")}
-                  placeholder="e.g., Under Investigation, Solved"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="case_number">Case Number</Label>
-                <Input
-                  id="case_number"
-                  {...register("case_number")}
-                  placeholder="e.g., CR-2024-001"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="investigating_officer">Investigating Officer</Label>
-                <Input
-                  id="investigating_officer"
-                  {...register("investigating_officer")}
-                  placeholder="Officer name"
-                  required
-                />
-              </div>
-            </div>
-            
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Crime
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Add New Crime Record</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                {...register("description")}
-                placeholder="Detailed description of the crime"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="suspect">Suspect</Label>
+              <Label htmlFor="crime_type">Crime Type</Label>
               <Input
-                id="suspect"
-                {...register("suspect")}
-                placeholder="Suspect details"
+                id="crime_type"
+                {...register("crime_type")}
+                placeholder="e.g., Theft, Cybercrime"
                 required
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="evidence">Evidence</Label>
-              <Textarea
-                id="evidence"
-                {...register("evidence")}
-                placeholder="List of evidence collected"
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                {...register("date")}
                 required
               />
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="resolution">Resolution</Label>
-              <Textarea
-                id="resolution"
-                {...register("resolution")}
-                placeholder="Current resolution or outcome"
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                {...register("location")}
+                placeholder="City, State"
                 required
               />
             </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">Submit</Button>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Input
+                id="status"
+                {...register("status")}
+                placeholder="e.g., Under Investigation, Solved"
+                required
+              />
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </RoleGuard>
+            <div className="space-y-2">
+              <Label htmlFor="case_number">Case Number</Label>
+              <Input
+                id="case_number"
+                {...register("case_number")}
+                placeholder="e.g., CR-2024-001"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="investigating_officer">Investigating Officer</Label>
+              <Input
+                id="investigating_officer"
+                {...register("investigating_officer")}
+                placeholder="Officer name"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              {...register("description")}
+              placeholder="Detailed description of the crime"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="suspect">Suspect</Label>
+            <Input
+              id="suspect"
+              {...register("suspect")}
+              placeholder="Suspect details"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="evidence">Evidence</Label>
+            <Textarea
+              id="evidence"
+              {...register("evidence")}
+              placeholder="List of evidence collected"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="resolution">Resolution</Label>
+            <Textarea
+              id="resolution"
+              {...register("resolution")}
+              placeholder="Current resolution or outcome"
+              required
+            />
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Submit</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
