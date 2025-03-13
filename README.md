@@ -68,9 +68,3 @@ This project is built with:
 - Recharts - Charts and data visualization
 - OpenLayers - Interactive mapping library
 
-## Deployment
-
-You can deploy this project through:
-
-1. Lovable's built-in deployment feature
-2. Manual deployment to any hosting service that supports static websites (Vercel, Netlify, etc.)
