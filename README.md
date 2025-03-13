@@ -1,7 +1,25 @@
 
+# Crime Pattern Detection System
+
+A comprehensive web application for analyzing, visualizing, and detecting crime patterns to help law enforcement make data-driven decisions.
+
 Changes made via Lovable will be committed automatically to this repo.
 
-**Use your preferred IDE**
+## Features
+
+- Interactive crime map visualization
+- Statistical analysis of crime patterns
+- Historical data comparison
+- Real-time incident tracking
+- User authentication and role-based access
+
+## Getting Started
+
+### Using Lovable (Recommended)
+
+Continue making changes through the Lovable interface for the best experience.
+
+### Using Your Preferred IDE
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
@@ -23,13 +41,13 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Edit a file directly in GitHub
 
 - Navigate to the desired file(s).
 - Click the "Edit" button (pencil icon) at the top right of the file view.
 - Make your changes and commit the changes.
 
-**Use GitHub Codespaces**
+### Use GitHub Codespaces
 
 - Navigate to the main page of your repository.
 - Click on the "Code" button (green button) near the top right.
@@ -37,14 +55,22 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Technologies Used
 
-This project is built with .
+This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Vite - Fast build tool and development server
+- TypeScript - Typed JavaScript for better development experience
+- React - UI component library
+- shadcn-ui - Accessible and customizable UI components
+- Tailwind CSS - Utility-first CSS framework
+- Tanstack Query - Data fetching and state management
+- Recharts - Charts and data visualization
+- OpenLayers - Interactive mapping library
 
-## How can I deploy this project?
+## Deployment
+
+You can deploy this project through:
+
+1. Lovable's built-in deployment feature
+2. Manual deployment to any hosting service that supports static websites (Vercel, Netlify, etc.)
