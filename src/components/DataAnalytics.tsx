@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "./StatCard";
 import { CrimeHistory } from "./CrimeHistory";
+import { SurveillancePanel } from "./SurveillancePanel";
 
 export function DataAnalytics() {
   return (
@@ -33,6 +34,9 @@ export function DataAnalytics() {
       </div>
       <div className="mt-4">
         <CrimeHistory />
+      </div>
+      <div className="mt-4">
+        <SurveillancePanel />
       </div>
     </div>
   );
