@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, StopCircle, Video, AlertCircle, Smile } from "lucide-react";
+import { Camera, StopCircle, Video, AlertCircle, Smile, Bomb, Skull, Knife, HandMetal, Gun } from "lucide-react";
 import * as cocossd from '@tensorflow-models/coco-ssd';
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
@@ -17,10 +17,12 @@ export function CameraFeed() {
     bbox: [number, number, number, number];
     expression?: string;
     bodyLanguage?: string;
+    dangerousObject?: string;
   }>>([]);
   const [model, setModel] = useState<cocossd.ObjectDetection | null>(null);
   const animationRef = useRef<number | null>(null);
   const [suspiciousActivity, setSuspiciousActivity] = useState(false);
+  const [dangerousObjectDetected, setDangerousObjectDetected] = useState(false);
 
   // Initialize the object detection model
   useEffect(() => {
@@ -61,7 +63,7 @@ export function CameraFeed() {
         detectFrame();
         toast({
           title: "Camera surveillance started",
-          description: "Monitoring for suspicious activity...",
+          description: "Monitoring for suspicious activity and dangerous objects...",
         });
       };
     } catch (error) {
@@ -85,6 +87,7 @@ export function CameraFeed() {
     
     setIsRecording(false);
     setSuspiciousActivity(false);
+    setDangerousObjectDetected(false);
     
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
@@ -104,22 +107,43 @@ export function CameraFeed() {
     // Perform detection
     const predictions = await model.detect(videoRef.current);
     
-    // Filter for people only
-    const peopleDetections = predictions
-      .filter(prediction => prediction.class === 'person')
-      .map(detection => {
-        // Add face expression and body language analysis
-        const enhancedDetection = {
+    // Process all detections
+    const enhancedDetections = predictions.map(detection => {
+      // Add face expression and body language analysis for people
+      if (detection.class === 'person') {
+        return {
           ...detection,
           expression: analyzeFacialExpression(detection),
           bodyLanguage: analyzeBodyLanguage(detection),
         };
+      } 
+      // Check for dangerous objects
+      else if (['cell phone', 'knife', 'scissors', 'baseball bat', 'bottle'].includes(detection.class)) {
+        // Map common COCO-SSD objects to potentially dangerous items
+        const dangerousMapping: Record<string, string> = {
+          'cell phone': Math.random() > 0.7 ? 'Gun' : 'Cell phone',
+          'knife': 'Knife',
+          'scissors': Math.random() > 0.5 ? 'Knife' : 'Scissors',
+          'baseball bat': Math.random() > 0.7 ? 'Weapon' : 'Baseball bat',
+          'bottle': Math.random() > 0.8 ? 'Explosive' : 'Bottle'
+        };
+        
+        return {
+          ...detection,
+          dangerousObject: dangerousMapping[detection.class]
+        };
+      }
+      
+      return detection;
+    });
 
-        return enhancedDetection;
-      });
+    // Filter for people and dangerous objects
+    const relevantDetections = enhancedDetections.filter(detection => 
+      detection.class === 'person' || detection.dangerousObject
+    );
     
     // Check for suspicious activity
-    const hasSuspiciousActivity = peopleDetections.some(
+    const hasSuspiciousActivity = relevantDetections.some(
       detection => 
         detection.expression === 'Angry' || 
         detection.expression === 'Suspicious' ||
@@ -127,6 +151,16 @@ export function CameraFeed() {
         detection.bodyLanguage === 'Anxious'
     );
     
+    // Check for dangerous objects
+    const hasDangerousObjects = relevantDetections.some(
+      detection => 
+        detection.dangerousObject === 'Gun' || 
+        detection.dangerousObject === 'Knife' || 
+        detection.dangerousObject === 'Weapon' ||
+        detection.dangerousObject === 'Explosive'
+    );
+    
+    // Update suspicious activity state
     if (hasSuspiciousActivity && !suspiciousActivity) {
       setSuspiciousActivity(true);
       toast({
@@ -139,17 +173,30 @@ export function CameraFeed() {
       setSuspiciousActivity(false);
     }
     
+    // Update dangerous object detection state
+    if (hasDangerousObjects && !dangerousObjectDetected) {
+      setDangerousObjectDetected(true);
+      toast({
+        title: "🚨 DANGEROUS OBJECT DETECTED",
+        description: "Potential weapon or dangerous item identified in camera feed!",
+        variant: "destructive",
+        duration: 10000,
+      });
+    } else if (!hasDangerousObjects && dangerousObjectDetected) {
+      setDangerousObjectDetected(false);
+    }
+    
     // Update state with new detections
-    setDetections(peopleDetections);
+    setDetections(relevantDetections);
     
     // Draw the detections
-    drawDetections(peopleDetections);
+    drawDetections(relevantDetections);
     
     // Continue detection
     animationRef.current = requestAnimationFrame(detectFrame);
   };
 
-  const drawDetections = (detections: Array<cocossd.DetectedObject & { expression?: string, bodyLanguage?: string }>) => {
+  const drawDetections = (detections: Array<cocossd.DetectedObject & { expression?: string, bodyLanguage?: string, dangerousObject?: string }>) => {
     if (!canvasRef.current || !videoRef.current) return;
     
     const ctx = canvasRef.current.getContext('2d');
@@ -166,40 +213,56 @@ export function CameraFeed() {
     detections.forEach(detection => {
       const [x, y, width, height] = detection.bbox;
       
-      // Draw bounding box - change color based on suspiciousness
-      const isSuspicious = 
-        detection.expression === 'Angry' || 
+      // Determine if this is a dangerous detection
+      const isDangerous = 
+        (detection.expression === 'Angry' || 
         detection.expression === 'Suspicious' ||
         detection.bodyLanguage === 'Aggressive' || 
-        detection.bodyLanguage === 'Anxious';
+        detection.bodyLanguage === 'Anxious') ||
+        (detection.dangerousObject && 
+          ['Gun', 'Knife', 'Weapon', 'Explosive'].includes(detection.dangerousObject));
       
-      ctx.strokeStyle = isSuspicious ? '#FF0000' : '#00FF00';
-      ctx.lineWidth = 2;
+      // Draw bounding box - change color based on danger level
+      ctx.strokeStyle = isDangerous ? '#FF0000' : '#00FF00';
+      ctx.lineWidth = isDangerous ? 3 : 2;
       ctx.strokeRect(x, y, width, height);
       
-      // Draw person label
-      ctx.fillStyle = isSuspicious ? '#FF0000' : '#00FF00';
-      ctx.font = '18px Arial';
-      ctx.fillText(
-        `Person: ${Math.round(detection.score * 100)}%`,
-        x, y > 20 ? y - 5 : y + 20
-      );
-
-      // Draw facial expression
-      if (detection.expression) {
-        ctx.fillStyle = '#FFFF00';
+      // Draw label
+      ctx.fillStyle = isDangerous ? '#FF0000' : '#00FF00';
+      ctx.font = isDangerous ? 'bold 18px Arial' : '18px Arial';
+      
+      if (detection.class === 'person') {
         ctx.fillText(
-          `Expression: ${detection.expression}`,
-          x, y + height + 20
+          `Person: ${Math.round(detection.score * 100)}%`,
+          x, y > 20 ? y - 5 : y + 20
         );
-      }
 
-      // Draw body language
-      if (detection.bodyLanguage) {
-        ctx.fillStyle = '#00FFFF';
+        // Draw facial expression
+        if (detection.expression) {
+          ctx.fillStyle = detection.expression === 'Happy' ? '#00FF00' : 
+                         (detection.expression === 'Neutral' ? '#FFFF00' : '#FF0000');
+          ctx.fillText(
+            `Expression: ${detection.expression}`,
+            x, y + height + 20
+          );
+        }
+
+        // Draw body language
+        if (detection.bodyLanguage) {
+          ctx.fillStyle = ['Relaxed', 'Walking'].includes(detection.bodyLanguage) ? '#00FFFF' : '#FF00FF';
+          ctx.fillText(
+            `Body Language: ${detection.bodyLanguage}`,
+            x, y + height + 45
+          );
+        }
+      } 
+      else if (detection.dangerousObject) {
+        // Draw dangerous object label with alert indicator
+        ctx.fillStyle = '#FF0000';
+        ctx.font = 'bold 20px Arial';
         ctx.fillText(
-          `Body Language: ${detection.bodyLanguage}`,
-          x, y + height + 45
+          `⚠️ ${detection.dangerousObject}: ${Math.round(detection.score * 100)}%`,
+          x, y > 25 ? y - 10 : y + 25
         );
       }
     });
@@ -251,13 +314,35 @@ export function CameraFeed() {
     }
   };
 
+  // Get appropriate icon for detection type
+  const getDetectionIcon = (detection: any) => {
+    if (detection.dangerousObject) {
+      switch (detection.dangerousObject) {
+        case 'Gun': return <Gun size={16} className="text-red-500" />;
+        case 'Knife': return <Knife size={16} className="text-red-500" />;
+        case 'Explosive': return <Bomb size={16} className="text-red-500" />;
+        case 'Weapon': return <HandMetal size={16} className="text-red-500" />;
+        default: return <AlertCircle size={16} className="text-yellow-500" />;
+      }
+    } else if (detection.expression) {
+      return <Smile size={16} className={detection.expression === 'Happy' ? "text-green-500" : "text-yellow-500"} />;
+    } else {
+      return <AlertCircle size={16} />;
+    }
+  };
+
   return (
     <Card className="relative">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-primary flex justify-between items-center">
           Camera Surveillance
           <div className="space-x-2 flex items-center">
-            {suspiciousActivity && (
+            {dangerousObjectDetected && (
+              <Badge variant="destructive" className="mr-2 animate-pulse flex gap-1 bg-red-600">
+                <Bomb size={14} /> Dangerous Object Detected!
+              </Badge>
+            )}
+            {suspiciousActivity && !dangerousObjectDetected && (
               <Badge variant="destructive" className="mr-2 animate-pulse flex gap-1">
                 <AlertCircle size={14} /> Suspicious Activity
               </Badge>
@@ -310,11 +395,19 @@ export function CameraFeed() {
             <ul className="space-y-1">
               {detections.map((detection, index) => (
                 <li key={index} className="flex items-center gap-2">
-                  <Smile size={16} className={detection.expression === 'Happy' ? 'text-green-500' : 'text-yellow-500'} />
+                  {getDetectionIcon(detection)}
                   <span>
-                    Person detected (confidence: {Math.round(detection.score * 100)}%)
-                    {detection.expression && ` - Expression: ${detection.expression}`}
-                    {detection.bodyLanguage && ` - Body Language: ${detection.bodyLanguage}`}
+                    {detection.dangerousObject ? (
+                      <strong className="text-red-500">
+                        {detection.dangerousObject} detected (confidence: {Math.round(detection.score * 100)}%)
+                      </strong>
+                    ) : (
+                      <>
+                        Person detected (confidence: {Math.round(detection.score * 100)}%)
+                        {detection.expression && ` - Expression: ${detection.expression}`}
+                        {detection.bodyLanguage && ` - Body Language: ${detection.bodyLanguage}`}
+                      </>
+                    )}
                   </span>
                 </li>
               ))}
@@ -323,8 +416,8 @@ export function CameraFeed() {
         )}
         
         <div className="text-sm text-muted-foreground">
-          <p>This camera feed uses object detection to identify people and analyze facial expressions and body language.</p>
-          <p>Note: This is a simulation for demonstration purposes. Real-world implementation would require dedicated ML models for accurate expression and pose analysis.</p>
+          <p>This camera feed uses object detection to identify people, dangerous objects, and analyze facial expressions and body language.</p>
+          <p>Note: This is a simulation for demonstration purposes. Real-world implementation would require dedicated ML models for accurate weapon and expression analysis.</p>
         </div>
       </CardContent>
     </Card>
