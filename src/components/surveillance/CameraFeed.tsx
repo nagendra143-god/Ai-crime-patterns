@@ -2,23 +2,23 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, StopCircle, Video, AlertCircle, Smile, Bomb, Skull, Knife, HandMetal, Gun } from "lucide-react";
+import { Camera, StopCircle, Video, AlertCircle, Smile, Bomb, Skull, Swords, Shield, AlertTriangle } from "lucide-react";
 import * as cocossd from '@tensorflow-models/coco-ssd';
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+
+// Create proper interfaces for our enhanced detections
+interface EnhancedDetection extends cocossd.DetectedObject {
+  expression?: string;
+  bodyLanguage?: string;
+  dangerousObject?: string;
+}
 
 export function CameraFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [detections, setDetections] = useState<Array<{
-    class: string;
-    score: number;
-    bbox: [number, number, number, number];
-    expression?: string;
-    bodyLanguage?: string;
-    dangerousObject?: string;
-  }>>([]);
+  const [detections, setDetections] = useState<EnhancedDetection[]>([]);
   const [model, setModel] = useState<cocossd.ObjectDetection | null>(null);
   const animationRef = useRef<number | null>(null);
   const [suspiciousActivity, setSuspiciousActivity] = useState(false);
@@ -115,15 +115,15 @@ export function CameraFeed() {
           ...detection,
           expression: analyzeFacialExpression(detection),
           bodyLanguage: analyzeBodyLanguage(detection),
-        };
+        } as EnhancedDetection;
       } 
       // Check for dangerous objects
       else if (['cell phone', 'knife', 'scissors', 'baseball bat', 'bottle'].includes(detection.class)) {
         // Map common COCO-SSD objects to potentially dangerous items
         const dangerousMapping: Record<string, string> = {
-          'cell phone': Math.random() > 0.7 ? 'Gun' : 'Cell phone',
-          'knife': 'Knife',
-          'scissors': Math.random() > 0.5 ? 'Knife' : 'Scissors',
+          'cell phone': Math.random() > 0.7 ? 'Firearm' : 'Cell phone',
+          'knife': 'Blade',
+          'scissors': Math.random() > 0.5 ? 'Blade' : 'Scissors',
           'baseball bat': Math.random() > 0.7 ? 'Weapon' : 'Baseball bat',
           'bottle': Math.random() > 0.8 ? 'Explosive' : 'Bottle'
         };
@@ -131,10 +131,10 @@ export function CameraFeed() {
         return {
           ...detection,
           dangerousObject: dangerousMapping[detection.class]
-        };
+        } as EnhancedDetection;
       }
       
-      return detection;
+      return detection as EnhancedDetection;
     });
 
     // Filter for people and dangerous objects
@@ -154,8 +154,8 @@ export function CameraFeed() {
     // Check for dangerous objects
     const hasDangerousObjects = relevantDetections.some(
       detection => 
-        detection.dangerousObject === 'Gun' || 
-        detection.dangerousObject === 'Knife' || 
+        detection.dangerousObject === 'Firearm' || 
+        detection.dangerousObject === 'Blade' || 
         detection.dangerousObject === 'Weapon' ||
         detection.dangerousObject === 'Explosive'
     );
@@ -196,7 +196,7 @@ export function CameraFeed() {
     animationRef.current = requestAnimationFrame(detectFrame);
   };
 
-  const drawDetections = (detections: Array<cocossd.DetectedObject & { expression?: string, bodyLanguage?: string, dangerousObject?: string }>) => {
+  const drawDetections = (detections: EnhancedDetection[]) => {
     if (!canvasRef.current || !videoRef.current) return;
     
     const ctx = canvasRef.current.getContext('2d');
@@ -220,7 +220,7 @@ export function CameraFeed() {
         detection.bodyLanguage === 'Aggressive' || 
         detection.bodyLanguage === 'Anxious') ||
         (detection.dangerousObject && 
-          ['Gun', 'Knife', 'Weapon', 'Explosive'].includes(detection.dangerousObject));
+          ['Firearm', 'Blade', 'Weapon', 'Explosive'].includes(detection.dangerousObject));
       
       // Draw bounding box - change color based on danger level
       ctx.strokeStyle = isDangerous ? '#FF0000' : '#00FF00';
@@ -315,13 +315,13 @@ export function CameraFeed() {
   };
 
   // Get appropriate icon for detection type
-  const getDetectionIcon = (detection: any) => {
+  const getDetectionIcon = (detection: EnhancedDetection) => {
     if (detection.dangerousObject) {
       switch (detection.dangerousObject) {
-        case 'Gun': return <Gun size={16} className="text-red-500" />;
-        case 'Knife': return <Knife size={16} className="text-red-500" />;
+        case 'Firearm': return <AlertTriangle size={16} className="text-red-500" />;
+        case 'Blade': return <Swords size={16} className="text-red-500" />;
         case 'Explosive': return <Bomb size={16} className="text-red-500" />;
-        case 'Weapon': return <HandMetal size={16} className="text-red-500" />;
+        case 'Weapon': return <Shield size={16} className="text-red-500" />;
         default: return <AlertCircle size={16} className="text-yellow-500" />;
       }
     } else if (detection.expression) {
@@ -423,3 +423,4 @@ export function CameraFeed() {
     </Card>
   );
 }
+
