@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Camera, StopCircle, Video } from "lucide-react";
 import * as tf from '@tensorflow/tfjs';
-import * as cocossd from '@tensorflow-models/coco-ssd';
 import '@tensorflow/tfjs-backend-webgl';
+import * as cocossd from '@tensorflow-models/coco-ssd';
 
 export function CameraFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -23,6 +23,14 @@ export function CameraFeed() {
   useEffect(() => {
     const loadModel = async () => {
       try {
+        // Initialize TensorFlow.js
+        await tf.ready();
+        console.log("TensorFlow.js initialized");
+        
+        // Set backend to webgl for better performance
+        await tf.setBackend('webgl');
+        console.log("WebGL backend set");
+        
         // Load the COCO-SSD model for object detection
         const loadedModel = await cocossd.load();
         setModel(loadedModel);
