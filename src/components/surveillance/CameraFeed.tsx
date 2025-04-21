@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +5,9 @@ import { Camera, StopCircle, Video, AlertCircle, Smile, Bomb, Skull, Swords, Shi
 import * as cocossd from '@tensorflow-models/coco-ssd';
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import * as tf from '@tensorflow/tfjs';
+import '@tensorflow/tfjs-backend-webgl';
 
-// Create proper interfaces for our enhanced detections
 interface EnhancedDetection extends cocossd.DetectedObject {
   expression?: string;
   bodyLanguage?: string;
@@ -24,22 +24,27 @@ export function CameraFeed() {
   const [suspiciousActivity, setSuspiciousActivity] = useState(false);
   const [dangerousObjectDetected, setDangerousObjectDetected] = useState(false);
 
-  // Initialize the object detection model
   useEffect(() => {
     const loadModel = async () => {
       try {
-        // Load the COCO-SSD model for object detection
+        await tf.setBackend('webgl');
+        console.log("Using TensorFlow backend:", tf.getBackend());
+        
         const loadedModel = await cocossd.load();
         setModel(loadedModel);
         console.log("COCO-SSD Model loaded successfully");
       } catch (error) {
         console.error("Failed to load model:", error);
+        toast({
+          title: "Model Loading Error",
+          description: "Could not load the object detection model. Please try again later.",
+          variant: "destructive",
+        });
       }
     };
     
     loadModel();
     
-    // Cleanup
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -58,7 +63,6 @@ export function CameraFeed() {
       videoRef.current.srcObject = stream;
       setIsRecording(true);
       
-      // Start detection once video is ready
       videoRef.current.onloadeddata = () => {
         detectFrame();
         toast({
@@ -104,12 +108,9 @@ export function CameraFeed() {
       return;
     }
     
-    // Perform detection
     const predictions = await model.detect(videoRef.current);
     
-    // Process all detections
     const enhancedDetections = predictions.map(detection => {
-      // Add face expression and body language analysis for people
       if (detection.class === 'person') {
         return {
           ...detection,
@@ -117,9 +118,7 @@ export function CameraFeed() {
           bodyLanguage: analyzeBodyLanguage(detection),
         } as EnhancedDetection;
       } 
-      // Check for dangerous objects
       else if (['cell phone', 'knife', 'scissors', 'baseball bat', 'bottle'].includes(detection.class)) {
-        // Map common COCO-SSD objects to potentially dangerous items
         const dangerousMapping: Record<string, string> = {
           'cell phone': Math.random() > 0.7 ? 'Firearm' : 'Cell phone',
           'knife': 'Blade',
@@ -137,12 +136,10 @@ export function CameraFeed() {
       return detection as EnhancedDetection;
     });
 
-    // Filter for people and dangerous objects
     const relevantDetections = enhancedDetections.filter(detection => 
       detection.class === 'person' || detection.dangerousObject
     );
     
-    // Check for suspicious activity
     const hasSuspiciousActivity = relevantDetections.some(
       detection => 
         detection.expression === 'Angry' || 
@@ -151,7 +148,6 @@ export function CameraFeed() {
         detection.bodyLanguage === 'Anxious'
     );
     
-    // Check for dangerous objects
     const hasDangerousObjects = relevantDetections.some(
       detection => 
         detection.dangerousObject === 'Firearm' || 
@@ -160,7 +156,6 @@ export function CameraFeed() {
         detection.dangerousObject === 'Explosive'
     );
     
-    // Update suspicious activity state
     if (hasSuspiciousActivity && !suspiciousActivity) {
       setSuspiciousActivity(true);
       toast({
@@ -173,7 +168,6 @@ export function CameraFeed() {
       setSuspiciousActivity(false);
     }
     
-    // Update dangerous object detection state
     if (hasDangerousObjects && !dangerousObjectDetected) {
       setDangerousObjectDetected(true);
       toast({
@@ -186,13 +180,10 @@ export function CameraFeed() {
       setDangerousObjectDetected(false);
     }
     
-    // Update state with new detections
     setDetections(relevantDetections);
     
-    // Draw the detections
     drawDetections(relevantDetections);
     
-    // Continue detection
     animationRef.current = requestAnimationFrame(detectFrame);
   };
 
@@ -202,18 +193,14 @@ export function CameraFeed() {
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
     
-    // Clear the canvas
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     
-    // Set canvas dimensions to match video
     canvasRef.current.width = videoRef.current.videoWidth;
     canvasRef.current.height = videoRef.current.videoHeight;
     
-    // Draw each detection
     detections.forEach(detection => {
       const [x, y, width, height] = detection.bbox;
       
-      // Determine if this is a dangerous detection
       const isDangerous = 
         (detection.expression === 'Angry' || 
         detection.expression === 'Suspicious' ||
@@ -222,12 +209,10 @@ export function CameraFeed() {
         (detection.dangerousObject && 
           ['Firearm', 'Blade', 'Weapon', 'Explosive'].includes(detection.dangerousObject));
       
-      // Draw bounding box - change color based on danger level
       ctx.strokeStyle = isDangerous ? '#FF0000' : '#00FF00';
       ctx.lineWidth = isDangerous ? 3 : 2;
       ctx.strokeRect(x, y, width, height);
       
-      // Draw label
       ctx.fillStyle = isDangerous ? '#FF0000' : '#00FF00';
       ctx.font = isDangerous ? 'bold 18px Arial' : '18px Arial';
       
@@ -237,7 +222,6 @@ export function CameraFeed() {
           x, y > 20 ? y - 5 : y + 20
         );
 
-        // Draw facial expression
         if (detection.expression) {
           ctx.fillStyle = detection.expression === 'Happy' ? '#00FF00' : 
                          (detection.expression === 'Neutral' ? '#FFFF00' : '#FF0000');
@@ -247,7 +231,6 @@ export function CameraFeed() {
           );
         }
 
-        // Draw body language
         if (detection.bodyLanguage) {
           ctx.fillStyle = ['Relaxed', 'Walking'].includes(detection.bodyLanguage) ? '#00FFFF' : '#FF00FF';
           ctx.fillText(
@@ -257,7 +240,6 @@ export function CameraFeed() {
         }
       } 
       else if (detection.dangerousObject) {
-        // Draw dangerous object label with alert indicator
         ctx.fillStyle = '#FF0000';
         ctx.font = 'bold 20px Arial';
         ctx.fillText(
@@ -269,15 +251,11 @@ export function CameraFeed() {
   };
 
   const analyzeFacialExpression = (detection: cocossd.DetectedObject): string => {
-    // In a real implementation, this would use a dedicated facial expression model
-    // Here we'll simulate results based on some heuristics from the bounding box
-    
     const [x, y, width, height] = detection.bbox;
     const faceRatio = width / height;
     
-    // Simulate different expressions based on position in the frame and size
     const centerX = x + (width / 2);
-    const randomFactor = Math.sin(Date.now() / 1000 + centerX) * 0.5 + 0.5; // Creates variation over time
+    const randomFactor = Math.sin(Date.now() / 1000 + centerX) * 0.5 + 0.5;
     
     if (randomFactor < 0.2) return "Neutral";
     if (randomFactor < 0.4) return "Happy";
@@ -287,16 +265,11 @@ export function CameraFeed() {
   };
 
   const analyzeBodyLanguage = (detection: cocossd.DetectedObject): string => {
-    // Again, in a real implementation this would use a pose estimation model
-    // Here we simulate based on aspect ratio and position
-    
     const [x, y, width, height] = detection.bbox;
     const aspectRatio = width / height;
     
-    // Use time-based randomness for demo purposes
     const randomFactor = Math.cos(Date.now() / 1500 + y) * 0.5 + 0.5;
     
-    // Different body language based on aspect ratio and simulated movement
     if (aspectRatio > 1.5) {
       return "Lying down";
     } else if (aspectRatio > 0.8 && aspectRatio < 1.2) {
@@ -314,7 +287,6 @@ export function CameraFeed() {
     }
   };
 
-  // Get appropriate icon for detection type
   const getDetectionIcon = (detection: EnhancedDetection) => {
     if (detection.dangerousObject) {
       switch (detection.dangerousObject) {
@@ -423,4 +395,3 @@ export function CameraFeed() {
     </Card>
   );
 }
-
